@@ -16,12 +16,10 @@ public class Database {
     private ArrayList<Integer> simItems;
     private ArrayList<Double> ratings;
     private ArrayList<Double> ratings2;
-
     private HashMap<Integer, HashMap<Integer,Double>> trainingSet;
-
     private User userPredicting;
-
     static final int TEST_SET_SIZE = 60705;
+
 
     public static void main(String[] args) {
         Database db = new Database();
