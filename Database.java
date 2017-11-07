@@ -95,6 +95,8 @@ public class Database {
                 }else {
 
                     user = nextUser;
+                    //wankers
+					//more wankers
                 }
 				trainingSet.put(user, new HashMap<Integer,Double>());
 				/*
