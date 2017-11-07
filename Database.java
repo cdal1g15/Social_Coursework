@@ -106,6 +106,8 @@ public class Database {
     }
 
 
+    //Basically do we need anything below here?
+
     /**
      * Takes two users in and returns a list of similar items
      * @param user1
@@ -113,7 +115,6 @@ public class Database {
      * @return
      */
     public ArrayList<Integer> getSimItems(int user1, int user2){
-
 
         ArrayList<Integer> simItems = new ArrayList<Integer>();
         String selectStmt = "SELECT item_id FROM trainingSet WHERE user_id=";
