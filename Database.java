@@ -69,6 +69,9 @@ public class Database {
 	
 	public void loadTrainingSet(){
 		
+		int user = 0;
+		int i=0;
+		
 		try{
 			String sql = "SELECT * FROM trainingSet";
 			PreparedStatement stmt = c.prepareStatement(sql);
@@ -76,9 +79,21 @@ public class Database {
 			ResultSet rs = stmt.executeQuery();
 			c.commit();
 			
-			
 			while(rs.next()){
-				//trainingSet.put(rs.getInt(1) + "_" + rs.getInt(2), rs.getDouble(3));
+				user = rs.getInt(1);
+				trainingSet.put(user, new HashMap<Integer,Double>());
+				
+				sql="SELECT item_id,rating FROM trainingSet where user_id=" + user;
+				stmt = c.prepareStatement(sql);
+
+				ResultSet itemResultSet = stmt.executeQuery();
+				c.commit();
+				
+				while(itemResultSet.next())
+					trainingSet.get(user).put(itemResultSet.getInt(1), itemResultSet.getDouble(2));
+				i++;
+				if(i%5000==0)
+					System.out.println(i);
 			}
 			
 		}catch(SQLException e){
