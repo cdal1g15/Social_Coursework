@@ -18,7 +18,8 @@ public class Database {
 	private User userPredicting;
 	
 	static final int TEST_SET_SIZE = 60705;
-	
+
+	//Put Comments you boob
 	public static void main(String[] args) {
 		Database db = new Database();
 		db.simCity();
@@ -40,7 +41,7 @@ public class Database {
 	}
 	
 	
-	/*public int countUsers(){
+	public int countUsers(){
 		int noOfUsers = 0;
 		
 		try{
@@ -61,7 +62,7 @@ public class Database {
 	
 	
 	
-	private void getPrediction(int user_id) {
+	/*private void getPrediction(int user_id) {
 		String sql = "SELECT prediction from testTable where user_id=" + user_id;
 		
 		try{
