@@ -30,6 +30,8 @@ public class Database {
 		System.out.println(db.trainingSet.size());
 	}
 
+
+
 	public Database() {
 		simItems = new ArrayList<Integer>();
 		ratings = new ArrayList<Double>();
@@ -46,7 +48,9 @@ public class Database {
 			e.printStackTrace();
 		}
 	}
-	
+
+
+
 	public void setPragmaValues(){
 		try{
 			
@@ -66,7 +70,9 @@ public class Database {
 			e.printStackTrace();
 		}
 	}
-	
+
+
+
 	public void loadTrainingSet(){
 		
 		int user = 0;
@@ -78,23 +84,34 @@ public class Database {
 			
 			ResultSet rs = stmt.executeQuery();
 			c.commit();
-			
+			rs.last();
+
+
 			while(rs.next()){
-				user = rs.getInt(1);
+			    int nextUser= rs.getInt(1);
+			    if(user==nextUser) {
+                   //Add items to hashmap for user
+
+                }else {
+
+                    user = nextUser;
+                }
 				trainingSet.put(user, new HashMap<Integer,Double>());
-				
+				/*
 				sql="SELECT item_id,rating FROM trainingSet where user_id=" + user;
 				stmt = c.prepareStatement(sql);
 
-				ResultSet itemResultSet = stmt.executeQuery();
+				//ResultSet itemResultSet = stmt.executeQuery();
 				c.commit();
 				
 				while(itemResultSet.next())
 					trainingSet.get(user).put(itemResultSet.getInt(1), itemResultSet.getDouble(2));
-				i++;
-				if(i%5000==0)
+				i++;*/
+				/*if(i%5000==0){
 					System.out.println(i);
+				}*/
 			}
+			System.out.println("Fucking Hell");
 			
 		}catch(SQLException e){
 			System.out.println("SQLException: " + e.getMessage());
@@ -102,7 +119,9 @@ public class Database {
 		}
 		
 	}
-	
+
+
+
 	public ArrayList<Integer> getSimItems(int user1, int user2){
 
 		
@@ -130,8 +149,9 @@ public class Database {
 		
 		return simItems;
 	}
-	
-	
+
+
+
 	public ArrayList<Double> getRatings(int user_id, ArrayList<Integer> simItems){
 		
 		ArrayList<Double> ratings = new ArrayList<Double>();
@@ -162,7 +182,9 @@ public class Database {
 		return ratings;
 		
 	}
-	
+
+
+
 	public double getRating(int user_id, int item_id){
 		
 		double rating = 0.0;
@@ -184,7 +206,9 @@ public class Database {
 			return 0;
 		}
 	}
-	
+
+
+
 	public void insertPredictedRating(int user_id, double rating){
 		try{
 			String sql = "UPDATE testTable SET prediction=? WHERE user_id=?";
@@ -202,7 +226,9 @@ public class Database {
 			e.printStackTrace();
 		}
 	}
-	
+
+
+
 	public double getAverage(int user_id){
 		
 		double avg = 0.0;
@@ -225,7 +251,10 @@ public class Database {
 		
 		return avg;
 	}
-	
+
+
+
+
 	public double getTopSum(int user1, int user2){
 		double sum = 0.0;
 		if(simItems.isEmpty())
@@ -244,7 +273,9 @@ public class Database {
 		
 		return sum;
 	}
-	
+
+
+
 	public double getSumBooty(int user1, int user2){
 		double booty = 0.0;
 		
@@ -265,7 +296,9 @@ public class Database {
 		
 		return booty;
 	}
-	
+
+
+
 	public void simCity(){
 		
 		int[] user_ids;
@@ -304,7 +337,9 @@ public class Database {
 		}
 		
 	}
-	
+
+
+
 	private double predictRating(User user, ArrayList<User> simMeasures) {
 		double prediction = userPredicting.getAverage();
 		double topSum = 0.0;
@@ -323,6 +358,8 @@ public class Database {
 		
 	}
 
+
+
 	public double getSimilarity(int user1, int user2){
 
 		simItems = getSimItems(user1, user2);
@@ -336,7 +373,9 @@ public class Database {
 		return 0.0;
 		
 	}
-	
+
+
+
 	public int[] getAllUserIDs(){
 		int[] userIDs = new int[TEST_SET_SIZE];
 		
@@ -361,7 +400,10 @@ public class Database {
 		
 		return userIDs;
 	}
-	
+
+
+
+
 	public int[] getAllItemIDs(){
 		int[] itemIDs = new int[TEST_SET_SIZE];
 		
