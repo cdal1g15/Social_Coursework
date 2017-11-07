@@ -25,7 +25,7 @@ public class Database {
         Database db = new Database();
         //db.simCity();
         db.loadTrainingSet();
-        System.out.println(db.trainingSet.size());
+        db.sizeOfSet(db.trainingSet);
     }
 
 
@@ -71,49 +71,38 @@ public class Database {
     }
 
 
+    public void sizeOfSet(HashMap inputSet){
+        System.out.println(inputSet.size());
+    }
+
+
     //Loads trainingSet in java
     public void loadTrainingSet(){
-
         int user = 0;
         int i=0;
 
         try{
             String sql = "SELECT * FROM trainingSet";
             PreparedStatement stmt = c.prepareStatement(sql);
-
             ResultSet rs = stmt.executeQuery();
             c.commit();
 
-
+            //Checks if nextUser is CurrentUser, if so adds item to CurrentUsers hash, else moves on
             while(rs.next()){
-                int nextUser= rs.getInt(1);
+                int nextUser= rs.getInt("user_id");
+
                 if(user==nextUser) {
-                    //Add items to hashmap for user
-                    //trainingSet.get(user).put(itemResultSet.getInt(1), itemResultSet.getDouble(2));
+                    trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
                 }else {
                     user = nextUser;
+                    trainingSet.put(user, new HashMap<Integer,Double>());
+                    trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
                 }
-                trainingSet.put(user, new HashMap<Integer,Double>());
-                /*
-                sql="SELECT item_id,rating FROM trainingSet where user_id=" + user;
-                stmt = c.prepareStatement(sql);
-
-                //ResultSet itemResultSet = stmt.executeQuery();
-                c.commit();
-
-                while(itemResultSet.next())
-
-                i++;*/
-                /*if(i%5000==0){
-                    System.out.println(i);
-                }*/
             }
-
         }catch(SQLException e){
             System.out.println("SQLException: " + e.getMessage());
             e.printStackTrace();
         }
-
     }
 
 
