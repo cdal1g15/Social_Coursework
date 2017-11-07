@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Database {
 	
@@ -16,7 +17,7 @@ public class Database {
 	private ArrayList<Double> ratings;
 	private ArrayList<Double> ratings2;
 	
-	//private HashMap<int,double>
+	private HashMap<Integer, HashMap<Integer,Double>> trainingSet;
 	
 	private User userPredicting;
 	
@@ -24,13 +25,18 @@ public class Database {
 	
 	public static void main(String[] args) {
 		Database db = new Database();
-		db.simCity();
+		//db.simCity();
+		db.loadTrainingSet();
+		System.out.println(db.trainingSet.size());
 	}
 
 	public Database() {
 		simItems = new ArrayList<Integer>();
 		ratings = new ArrayList<Double>();
 		ratings2 = new ArrayList<Double>();
+		
+		trainingSet = new HashMap<Integer, HashMap<Integer,Double>>();
+		
 		try {
 			Class.forName(JDBC_DRIVER);
 			c = DriverManager.getConnection(connection_string);
@@ -61,15 +67,26 @@ public class Database {
 		}
 	}
 	
-	/*public void loadTrainingSet(){
+	public void loadTrainingSet(){
+		
 		try{
+			String sql = "SELECT * FROM trainingSet";
+			PreparedStatement stmt = c.prepareStatement(sql);
+			
+			ResultSet rs = stmt.executeQuery();
+			c.commit();
+			
+			
+			while(rs.next()){
+				//trainingSet.put(rs.getInt(1) + "_" + rs.getInt(2), rs.getDouble(3));
+			}
 			
 		}catch(SQLException e){
 			System.out.println("SQLException: " + e.getMessage());
 			e.printStackTrace();
 		}
 		
-	}*/
+	}
 	
 	public ArrayList<Integer> getSimItems(int user1, int user2){
 
