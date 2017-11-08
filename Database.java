@@ -10,15 +10,12 @@ import java.util.HashMap;
 public class Database {
 
 
-    final String connection_string = "jdbc:sqlite:test.sl3";
-    public Connection c;
-    static final String JDBC_DRIVER = "org.sqlite.JDBC";
-    private ArrayList<Integer> simItems;
-    private ArrayList<Double> ratings;
-    private ArrayList<Double> ratings2;
+    private final String connection_string = "jdbc:sqlite:test.sl3";
+    private Connection c;
+    private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     private HashMap<Integer, HashMap<Integer,Double>> trainingSet;
-    private User userPredicting;
-    static final int TEST_SET_SIZE = 60705;
+    private HashMap<Integer, Double> userAverages;
+    //private static final int TEST_SET_SIZE = 60705;
 
 
     public static void main(String[] args) {
@@ -26,17 +23,17 @@ public class Database {
         //db.simCity();
         db.loadTrainingSet();
         db.sizeOfSet(db.trainingSet);
+        db.loadUserAverages();
+        Similarity sim = new Similarity(db.trainingSet, db.userAverages);
+        System.out.println(sim.sumTotal(4, 135350)); //4 and 135350 have sim of 0.36501
     }
 
 
 
     //Initialise storage, connect to database
-    public Database() {
-        simItems = new ArrayList<Integer>();
-        ratings = new ArrayList<Double>();
-        ratings2 = new ArrayList<Double>();
-
-        trainingSet = new HashMap<Integer, HashMap<Integer,Double>>();
+    private Database() {
+        trainingSet = new HashMap<>();
+        userAverages = new HashMap<>();
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -71,15 +68,34 @@ public class Database {
     }
 
 
-    public void sizeOfSet(HashMap inputSet){
+    private void sizeOfSet(HashMap inputSet){
         System.out.println(inputSet.size());
     }
 
 
+    /**
+     * Loads into Java, userAverages table
+     */
+    private void loadUserAverages(){
+        try{
+            String sql = "SELECT * FROM user_averages";
+            PreparedStatement stmt = c.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            c.commit();
+
+            while(rs.next()){
+                userAverages.put(rs.getInt("user_id"),rs.getDouble("avg"));
+            }
+        } catch (SQLException e) {
+            System.out.println("SQLException: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
     //Loads trainingSet in java
-    public void loadTrainingSet(){
+    private void loadTrainingSet(){
         int user = 0;
-        int i=0;
 
         try{
             String sql = "SELECT * FROM trainingSet";
@@ -95,7 +111,7 @@ public class Database {
                     trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
                 }else {
                     user = nextUser;
-                    trainingSet.put(user, new HashMap<Integer,Double>());
+                    trainingSet.put(user, new HashMap<>());
                     trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
                 }
             }
