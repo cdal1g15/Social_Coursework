@@ -22,8 +22,8 @@ public class Similarity {
         Double user1Average = userAverage.get(user1);
         Double user2Average = userAverage.get(user2);
         System.out.println(user1Average + " : " + user2Average);
-        Double top = topHalfSum(user1Hash, user2Hash, user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
-        Double bottom = getBottomSum(user1Hash, user2Hash, user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
+        Double top = topHalfSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
+        Double bottom = getBottomSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
 
         Double answer = top/bottom;
         return answer;
@@ -31,8 +31,7 @@ public class Similarity {
     }
 
 
-    public double topHalfSum(HashMap<Integer,Double> user1Hash, HashMap<Integer,Double> user2Hash,
-                             HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
+    public double topHalfSum(HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
                              Double user1Average, Double user2Average){
         Double sum = 0.0;
         /*
@@ -52,8 +51,7 @@ public class Similarity {
     }
 
 
-    public double getBottomSum(HashMap<Integer,Double> user1Hash, HashMap<Integer,Double> user2Hash,
-                               HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
+    public double getBottomSum(HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
                                Double user1Average, Double user2Average){
 
         Double leftBottomSum=0.0;
