@@ -21,13 +21,15 @@ public class Similarity {
         HashMap<Integer,Double> user2SimItemsHash = intersectMaps(user2Hash, user1Hash);
         Double user1Average = userAverage.get(user1);
         Double user2Average = userAverage.get(user2);
-        System.out.println(user1Average + " : " + user2Average);
+        //System.out.println(user1Average + " : " + user2Average);
         Double top = topHalfSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
+        if(top<0.6){
+            return 0.0;
+        }
         Double bottom = getBottomSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
 
         Double answer = top/bottom;
         return answer;
-
     }
 
 
@@ -44,7 +46,7 @@ public class Similarity {
             Integer item = entry1.getKey();
             Double user1Value = entry1.getValue();
             Double user2Value = user2SimItemsHash.get(item);
-            System.out.println("user1 :" + user1Value + " user2 :" + user2Value);
+            //System.out.println("user1 :" + user1Value + " user2 :" + user2Value);
             sum+= (user1Value - user1Average) * (user2Value - user2Average);
         }
         return sum;
@@ -82,8 +84,4 @@ public class Similarity {
         results.keySet().retainAll(b.keySet());
         return results;
     }
-
-
-
-
 }

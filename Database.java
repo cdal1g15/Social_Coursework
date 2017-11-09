@@ -1,9 +1,5 @@
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -21,13 +17,14 @@ public class Database {
     public static void main(String[] args) {
         Database db = new Database();
         //db.simCity();
-        db.loadTrainingSet();
-        db.sizeOfSet(db.trainingSet);
+        db.loadTrainingSet();//takes ~25 seconds
         db.loadUserAverages();
-        Similarity sim = new Similarity(db.trainingSet, db.userAverages);
-        System.out.println(sim.sumTotal(4, 135350)); //4 and 135350 have sim of 0.36501
+        db.sizeOfSet(db.trainingSet);
+        db.storeUserSimilarity();
+        //Similarity sim = new Similarity(db.trainingSet, db.userAverages);
+        //sim.sumTotal(4, 135350);
+        System.out.println(); //4 and 135350 have sim of 0.36501
     }
-
 
 
     //Initialise storage, connect to database
@@ -70,6 +67,16 @@ public class Database {
 
     private void sizeOfSet(HashMap inputSet){
         System.out.println(inputSet.size());
+    }
+
+
+    private void storeUserSimilarity(){
+        Similarity sim = new Similarity(trainingSet, userAverages);
+        ArrayList<ArrayList<Double>> simUsers = new ArrayList<>();
+        for(int i=1; i<10/*userAverages.size()*/; i++){
+            //store similarity somehow - possibly in sql?
+        }
+        System.out.println();
     }
 
 
