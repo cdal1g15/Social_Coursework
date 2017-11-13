@@ -7,13 +7,14 @@ import java.util.Map;
 public class Database {
 
 
-    private final String connection_string = "jdbc:sqlite:test.sl3";
+    private final String connection_string = "jdbc:sqlite:/media/conor/AdrianaTheSlut/test.sl3";
     private Connection c;
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     private HashMap<Integer, HashMap<Integer, Double>> trainingSet;
     private HashMap<Integer, Double> userAverages;
     private HashMap<Integer, HashMap<Integer, Double>> predictions;
-
+    private ArrayList<Integer> testUsers;
+    private String[] sqlSim;
     //private static final int TEST_SET_SIZE = 60705;
 
 
@@ -21,6 +22,7 @@ public class Database {
         Database db = new Database();
         db.loadTrainingSet();//takes ~25 seconds
         db.loadUserAverages();
+        db.loadTestUsers();
         db.sizeOfSet(db.trainingSet);
         db.storeUserSimilarity();
         //Similarity sim = new Similarity(db.trainingSet, db.userAverages);
@@ -33,6 +35,7 @@ public class Database {
         trainingSet = new HashMap<>();
         userAverages = new HashMap<>();
         predictions = new HashMap<>();
+        testUsers = new ArrayList<>();
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -51,11 +54,39 @@ public class Database {
 
     private void storeUserSimilarity() {
         Similarity sim = new Similarity(trainingSet, userAverages);
-        ArrayList<ArrayList<Double>> simUsers = new ArrayList<>();
-        for (int i = 1; i < 10/*userAverages.size()*/; i++) {
-            //store similarity somehow - possibly in sql?
+        HashMap<Integer, HashMap<Integer, Double>> simUsers = new HashMap<>();
+        String sql;
+        PreparedStatement stmt = null;
+        int user1;
+        sql = "INSERT INTO simMatrix VALUES (?,?,?)";
+        try {
+            stmt = c.prepareStatement(sql);
+            Long time = System.currentTimeMillis();
+            for (int i = 0; i < 10; /*testUsers.size();*/ i++) {
+                user1 = testUsers.get(i);
+                int j=1;
+                int limit =0;
+                while( j < userAverages.size() && limit <30) {
+                    Double userSim = sim.sumTotal(user1, j);
+                    if(userSim > 0.7 && userSim <1) {
+                        stmt.setInt(1, user1);
+                        stmt.setInt(2, j);
+                        stmt.setDouble(3, userSim);
+                        stmt.addBatch();
+                        limit++;
+                    }
+                    j++;
+                }
+                System.out.println("Done " + user1);
+                stmt.executeBatch();
+                c.commit();
+            }
+            Long end = System.currentTimeMillis();
+            System.out.println((end-time)/1000 + "seconds");
+        }catch (SQLException e) {
+            System.out.println("SQLException: " + e.getMessage());
+            e.printStackTrace();
         }
-        System.out.println();
     }
 
 
@@ -72,12 +103,28 @@ public class Database {
             while (rs.next()) {
                 userAverages.put(rs.getInt("user_id"), rs.getDouble("avg"));
             }
+            System.out.println("User Averages loaded.");
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
             e.printStackTrace();
         }
+    }
 
-        System.out.println("User Averages loaded.");
+    private void loadTestUsers() {
+        try {
+            String sql = "SELECT DISTINCT user_id FROM testTable";
+            PreparedStatement stmt = c.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            c.commit();
+
+            while (rs.next()) {
+                testUsers.add(rs.getInt("user_id"));
+            }
+            System.out.println("Test Users loaded.");
+        } catch (SQLException e) {
+            System.out.println("SQLException: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 
@@ -103,25 +150,16 @@ public class Database {
                     trainingSet.put(user, new HashMap<>());
                     trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
                 }
-
-                if(user%10000==0)
-                    System.out.println(user);
-
             }
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
             e.printStackTrace();
         }
-
         System.out.println("Training Set loaded.");
     }
 
     //stores predictions calculated in predictions hash map
     private void storePredictions(){
-
-
-
-
         Prediction pred = new Prediction();
     }
 
