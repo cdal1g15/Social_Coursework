@@ -62,11 +62,11 @@ public class Database {
         try {
             stmt = c.prepareStatement(sql);
             Long time = System.currentTimeMillis();
-            for (int i = 0; i < 10; /*testUsers.size();*/ i++) {
+            for (int i = 0; i < testUsers.size(); i++) {
                 user1 = testUsers.get(i);
                 int j=1;
                 int limit =0;
-                while( j < userAverages.size() && limit <30) {
+                while( j < userAverages.size() && limit <120) {
                     Double userSim = sim.sumTotal(user1, j);
                     if(userSim > 0.7 && userSim <1) {
                         stmt.setInt(1, user1);

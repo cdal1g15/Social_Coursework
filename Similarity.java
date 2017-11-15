@@ -23,7 +23,7 @@ public class Similarity {
         Double user2Average = userAverage.get(user2);
         //System.out.println(user1Average + " : " + user2Average);
         Double top = topHalfSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
-        if(top<0.6){
+        if(top<0){
             return 0.0;
         }
         Double bottom = getBottomSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
