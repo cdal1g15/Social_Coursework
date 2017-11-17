@@ -43,7 +43,7 @@ public class Prediction {
     }
 
     //calculates bottom half of sum
-    private double bottomSum(Integer user_id){
+    private double bottomSum(int user_id){
         double sum = 0.0;
 
         HashMap<Integer, Double> user_sim = similarities.get(user_id);
