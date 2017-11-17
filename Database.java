@@ -27,7 +27,8 @@ public class Database {
         db.loadUniqueTestUsers();
         db.loadTestSet();
         db.sizeOfSet(db.trainingSet);
-       db.storePredictions();
+        db.storePredictions();
+        db.addPredictedRatings();
         //Similarity sim = new Similarity(db.trainingSet, db.userAverages);
         //sim.sumTotal(4, 135350);
         System.out.println(); //4 and 135350 have sim of 0.36501
@@ -193,7 +194,11 @@ public class Database {
             nextUser=entry.getKey();
             itemID=entry.getValue();
 
-            similarities = loadSimilarities(nextUser);
+            //won't load again if user is the same
+            if(userID!=nextUser) {
+                similarities = loadSimilarities(nextUser);
+            }
+
             prediction = pred.total(nextUser, itemID);
 
             if(userID == nextUser){
