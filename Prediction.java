@@ -22,7 +22,7 @@ public class Prediction {
 
 
     //calculates top half of sum
-    private double topSum(Integer user_id, Integer item_id){
+    private double topSum(int user_id, int item_id){
         double sum = 0.0;
         int user = 0;
         double similarity = 0.0;

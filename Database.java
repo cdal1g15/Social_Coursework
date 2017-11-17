@@ -183,7 +183,7 @@ public class Database {
 
     //stores predictions calculated in predictions hash map
     private void storePredictions(){
-        Prediction pred = new Prediction(trainingSet,userAverages,similarities);
+        Prediction pred  = new Prediction(trainingSet,userAverages,null);
         int userID = 0;
         int nextUser=0;
         int itemID=0;
@@ -197,6 +197,7 @@ public class Database {
             //won't load again if user is the same
             if(userID!=nextUser) {
                 similarities = loadSimilarities(nextUser);
+                pred = new Prediction(trainingSet,userAverages,similarities);
             }
 
             prediction = pred.total(nextUser, itemID);
