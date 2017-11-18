@@ -183,11 +183,11 @@ public class Database {
 
     //stores predictions calculated in predictions hash map
     private void storePredictions(){
-        Prediction pred  = new Prediction(trainingSet,userAverages,null);
         int userID = 0;
         int nextUser=0;
         int itemID=0;
         double prediction = 0.0;
+        Prediction pred = new Prediction(trainingSet,userAverages,loadSimilarities(1));
 
         //calculates prediction for every record in testSet
         for(Map.Entry<Integer, Integer> entry : testSet.entrySet()){
