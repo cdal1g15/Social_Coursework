@@ -187,7 +187,7 @@ public class Database {
         int nextUser=0;
         int itemID=0;
         double prediction = 0.0;
-        Prediction pred = new Prediction(trainingSet,userAverages,loadSimilarities(1));
+        Prediction pred = new Prediction(trainingSet,userAverages,null);
 
         //calculates prediction for every record in testSet
         for(Map.Entry<Integer, Integer> entry : testSet.entrySet()){
@@ -196,8 +196,7 @@ public class Database {
 
             //won't load again if user is the same
             if(userID!=nextUser) {
-                similarities = loadSimilarities(nextUser);
-                pred = new Prediction(trainingSet,userAverages,similarities);
+                pred.setSimilarity(loadSimilarities(nextUser));
             }
 
             prediction = pred.total(nextUser, itemID);

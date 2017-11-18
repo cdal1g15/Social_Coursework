@@ -21,6 +21,10 @@ public class Prediction {
     }
 
 
+    public void setSimilarity(HashMap<Integer, HashMap<Integer, Double>> similarities){
+        this.similarities = similarities;
+    }
+
     //calculates top half of sum
     private double topSum(int user_id, int item_id){
         double sum = 0.0;
