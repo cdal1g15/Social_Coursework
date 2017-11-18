@@ -21,8 +21,15 @@ public class Prediction {
     }
 
 
-    public void setSimilarity(HashMap<Integer, HashMap<Integer, Double>> similarities){
-        this.similarities = similarities;
+    public void setSimilarity(HashMap<Integer, HashMap<Integer, Double>> similarity){
+        similarities = similarity;
+    }
+
+    private boolean checkItemExists(int user, int item){
+        if(trainingSet.get(user).get(item) !=null){
+            return true;
+        }
+        return false;
     }
 
     //calculates top half of sum
@@ -34,13 +41,13 @@ public class Prediction {
         double user_average = 0.0;
 
         HashMap<Integer, Double> user_sim = similarities.get(user_id);
-
         for(Map.Entry<Integer, Double> entry: user_sim.entrySet()){
             user = entry.getKey();
             similarity = entry.getValue();
-            rating = trainingSet.get(user).get(item_id);
-
-            sum += similarity * (rating - user_average);
+            if(checkItemExists(user, item_id)) {
+                rating = trainingSet.get(user).get(item_id);
+                sum += similarity * (rating - user_average);
+            }
         }
 
         return sum;

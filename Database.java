@@ -3,6 +3,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Database {
 
@@ -14,7 +16,7 @@ public class Database {
     private HashMap<Integer, Double> userAverages;
     private HashMap<Integer, HashMap<Integer, Double>> predictions;
     private ArrayList<Integer> testUsers;
-    private HashMap<Integer,Integer> testSet;
+    private HashMap<Integer,ArrayList<Integer>> testSet;
     private HashMap<Integer, HashMap<Integer, Double>> similarities;
     private String[] sqlSim;
     //private static final int TEST_SET_SIZE = 60705;
@@ -24,7 +26,7 @@ public class Database {
         Database db = new Database();
         db.loadTrainingSet();//takes ~25 seconds
         db.loadUserAverages();
-        db.loadUniqueTestUsers();
+        //db.loadUniqueTestUsers();
         db.loadTestSet();
         db.sizeOfSet(db.trainingSet);
         db.storePredictions();
@@ -33,6 +35,7 @@ public class Database {
         //sim.sumTotal(4, 135350);
         System.out.println(); //4 and 135350 have sim of 0.36501
     }
+
 
     //Initialise storage, connect to database
     private Database() {
@@ -118,13 +121,23 @@ public class Database {
 
     private void loadTestSet() {
         try {
+            int user = 0;
             String sql = "SELECT  user_id,item_id FROM testTable";
             PreparedStatement stmt = c.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
             c.commit();
 
             while (rs.next()) {
-                testSet.put(rs.getInt("user_id"), rs.getInt("item_id"));
+                int nextUser = rs.getInt("user_id");
+                if(user==nextUser){
+                    testSet.get(nextUser).add(rs.getInt("item_id"));
+                }
+                else{
+                    user =nextUser;
+                    testSet.put(rs.getInt("user_id"), new ArrayList<>());
+                    testSet.get(rs.getInt("user_id")).add(rs.getInt("item_id"));
+                }
+
             }
             System.out.println("Test Set loaded.");
         } catch (SQLException e) {
@@ -181,34 +194,77 @@ public class Database {
         System.out.println("Training Set loaded.");
     }
 
+    //loads from database the similarity measures for a user
+    public HashMap<Integer, HashMap<Integer, Double>> loadSimilarities(int test_user){
+        int user = 0;
+        int nextUser;
+        HashMap<Integer, HashMap<Integer, Double>> similarities = new HashMap<>();
+        try { //gets all similarities for a user
+            String sql = "SELECT * FROM simMatrix WHERE user_id=?";
+
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setInt(1,test_user);
+
+            ResultSet rs = stmt.executeQuery();
+            c.commit();
+
+            //Checks if nextUser is CurrentUser, if so adds item to CurrentUsers hash, else moves on
+            while (rs.next()) {
+                nextUser = rs.getInt("user_id");
+
+                if (user == nextUser) {
+                    similarities.get(user).put(rs.getInt("user2_id"), rs.getDouble("prediction"));
+                } else {
+                    user = nextUser;
+                    similarities.put(user, new HashMap<>());
+                    similarities.get(user).put(rs.getInt("user2_id"), rs.getDouble("prediction"));
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("SQLException: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return similarities;
+    }
+
+
     //stores predictions calculated in predictions hash map
     private void storePredictions(){
         int userID = 0;
         int nextUser=0;
-        int itemID=0;
+        ArrayList<Integer> itemID;
         double prediction = 0.0;
         Prediction pred = new Prediction(trainingSet,userAverages,null);
-
+        Long time = System.currentTimeMillis();
         //calculates prediction for every record in testSet
-        for(Map.Entry<Integer, Integer> entry : testSet.entrySet()){
+        int adrianaIsASlut =0;
+        for(Map.Entry<Integer, ArrayList<Integer>> entry : testSet.entrySet()){
             nextUser=entry.getKey();
             itemID=entry.getValue();
-
-            //won't load again if user is the same
-            if(userID!=nextUser) {
+            if (userID != nextUser) {
                 pred.setSimilarity(loadSimilarities(nextUser));
             }
 
-            prediction = pred.total(nextUser, itemID);
-
-            if(userID == nextUser){
-                predictions.get(userID).put(itemID, prediction);
-            }else{
-                userID=nextUser;
-                predictions.put(userID, new HashMap<Integer, Double>());
-                predictions.get(userID).put(itemID, prediction);
+            for(int i=0; i<itemID.size();i++) {
+                prediction = pred.total(nextUser, itemID.get(i));
+                if (userID == nextUser) {
+                    predictions.get(userID).put(itemID.get(i), prediction);
+                } else {
+                    userID = nextUser;
+                    predictions.put(userID, new HashMap<>());
+                    predictions.get(userID).put(itemID.get(i), prediction);
+                }
             }
+
+            if(adrianaIsASlut%1000 ==0){
+                System.out.println("Number of predictions (SLUTNUMBER)" + adrianaIsASlut);
+                Long end = System.currentTimeMillis();
+                System.out.println((end-time)/1000 + "seconds");
+            }
+            adrianaIsASlut++;
         }
+        Long end = System.currentTimeMillis();
+        System.out.println((end-time)/1000 + "seconds");
 
        System.out.println("Predictions loaded and calculated");
     }
@@ -254,47 +310,4 @@ public class Database {
             e.printStackTrace();
         }
     }
-
-    //loads from database the similarity measures for a user
-
-    public HashMap<Integer, HashMap<Integer, Double>> loadSimilarities(int test_user){
-
-        int user = 0;
-        int nextUser;
-
-        HashMap<Integer, HashMap<Integer, Double>> similarities = new HashMap<Integer, HashMap<Integer, Double>>();
-
-
-        try { //gets all similarities for a user
-            String sql = "SELECT * FROM simMatrix WHERE user_id=?";
-
-            PreparedStatement stmt = c.prepareStatement(sql);
-            stmt.setInt(1,test_user);
-
-            ResultSet rs = stmt.executeQuery();
-            c.commit();
-
-            //Checks if nextUser is CurrentUser, if so adds item to CurrentUsers hash, else moves on
-            while (rs.next()) {
-                nextUser = rs.getInt("user_id");
-
-                if (user == nextUser) {
-                    similarities.get(user).put(rs.getInt("user_2"), rs.getDouble("sim"));
-                } else {
-                    user = nextUser;
-                    similarities.put(user, new HashMap<>());
-                    similarities.get(user).put(rs.getInt("user_2"), rs.getDouble("sim"));
-                }
-            }
-
-
-        } catch (SQLException e) {
-            System.out.println("SQLException: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-
-        return similarities;
-    }
-
 }
