@@ -26,10 +26,7 @@ public class Prediction {
     }
 
     private boolean checkItemExists(int user, int item){
-        if(trainingSet.get(user).get(item) !=null){
-            return true;
-        }
-        return false;
+        return trainingSet.get(user).get(item) !=null;
     }
 
     //calculates top half of sum
@@ -46,6 +43,8 @@ public class Prediction {
             similarity = entry.getValue();
             if(checkItemExists(user, item_id)) {
                 rating = trainingSet.get(user).get(item_id);
+                //we didn't set the user average here, whoops
+                user_average = userAverages.get(user);
                 sum += similarity * (rating - user_average);
             }
         }
