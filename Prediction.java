@@ -54,13 +54,17 @@ public class Prediction {
     }
 
     //calculates bottom half of sum
-    private double bottomSum(int user_id){
+    private double bottomSum(int user_id, int item_id){
         double sum = 0.0;
 
         HashMap<Integer, Double> user_sim = similarities.get(user_id);
 
         for(Map.Entry<Integer, Double> entry: user_sim.entrySet()){
-            sum += entry.getValue();
+            int user = entry.getKey();
+            //Added user have same item check
+            if(checkItemExists(user, item_id)) {
+                sum += entry.getValue();
+            }
         }
 
         return sum;
@@ -73,7 +77,7 @@ public class Prediction {
         double bottomSum = 0.0;
 
         topSum = topSum(user_id, item_id);
-        bottomSum = bottomSum(user_id);
+        bottomSum = bottomSum(user_id, item_id);
 
         sum = (userAverages.get(user_id) + (topSum/bottomSum));
         return sum;
