@@ -1,6 +1,3 @@
-import javax.naming.NameNotFoundException;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +12,8 @@ public class Prediction {
     private HashMap<Integer, HashMap<Integer, Double>> similarities;
 
 
-    public Prediction(HashMap berlin, HashMap dortmund, HashMap munich){
+    public Prediction(HashMap<Integer, HashMap<Integer, Double>> berlin,
+                      HashMap<Integer, Double> dortmund, HashMap<Integer, HashMap<Integer, Double>> munich){
         trainingSet = berlin;
         userAverages = dortmund;
         similarities = munich;

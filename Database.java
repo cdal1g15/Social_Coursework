@@ -3,8 +3,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Database {
 
@@ -65,7 +63,7 @@ public class Database {
         Similarity sim = new Similarity(trainingSet, userAverages);
         HashMap<Integer, HashMap<Integer, Double>> simUsers = new HashMap<>();
         String sql;
-        PreparedStatement stmt = null;
+        PreparedStatement stmt;
         int user1;
         sql = "INSERT INTO simMatrix VALUES (?,?,?)";
         try {
@@ -167,7 +165,7 @@ public class Database {
     //Loads trainingSet in java
     private void loadTrainingSet() {
         int user = 0;
-        int nextUser = 0;
+        int nextUser;
 
         try {
             String sql = "SELECT * FROM trainingSet";
@@ -231,9 +229,9 @@ public class Database {
     //stores predictions calculated in predictions hash map
     private void storePredictions(){
         int userID = 0;
-        int nextUser=0;
+        int nextUser;
         ArrayList<Integer> itemID;
-        double prediction = 0.0;
+        double prediction;
         Prediction pred = new Prediction(trainingSet,userAverages,null);
         Long time = System.currentTimeMillis();
         //calculates prediction for every record in testSet
@@ -277,7 +275,7 @@ public class Database {
         int item_id;
         double rating;
         String sql;
-        PreparedStatement stmt = null;
+        PreparedStatement stmt;
 
 
         try {
