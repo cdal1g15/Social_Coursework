@@ -1,3 +1,4 @@
+import javax.naming.NameNotFoundException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -32,10 +33,10 @@ public class Prediction {
     //calculates top half of sum
     private double topSum(int user_id, int item_id){
         double sum = 0.0;
-        int user = 0;
-        double similarity = 0.0;
-        double rating = 0.0;
-        double user_average = 0.0;
+        int user;
+        double similarity;
+        double rating;
+        double user_average;
 
         HashMap<Integer, Double> user_sim = similarities.get(user_id);
         for(Map.Entry<Integer, Double> entry: user_sim.entrySet()){
@@ -71,15 +72,24 @@ public class Prediction {
 
     //calculates prediction using user_id and item_id
     public double total(int user_id, int item_id){
-        double sum = 0.0;
-        double topSum = 0.0;
-        double bottomSum = 0.0;
+        double sum;
+        double topSum;
+        double bottomSum;
 
         topSum = topSum(user_id, item_id);
         bottomSum = bottomSum(user_id, item_id);
-
-        sum = (userAverages.get(user_id) + (topSum/bottomSum));
+        //System.out.println("user average = " + userAverages.get(user_id));
+        sum = userAverages.get(user_id); //Set prediction as average rating
+        if(topSum!=0.0 && bottomSum !=0.0){
+            sum += (topSum/bottomSum);
+        }
+        if(sum>10){
+            sum=10.0;
+        }
+        //System.out.println("Sum = " + sum);
         return sum;
     }
+
+    //5.93576564765119 is average rating in trainingSet
 
 }
