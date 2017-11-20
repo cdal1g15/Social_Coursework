@@ -255,9 +255,9 @@ public class Database {
             }
 
             if(adrianaIsASlut%1000 ==0){
-                System.out.println("Number of predictions (SLUTNUMBER)" + adrianaIsASlut);
+                System.out.println( adrianaIsASlut + " Predictions");
                 Long end = System.currentTimeMillis();
-                System.out.println((end-time)/1000 + "seconds");
+                System.out.println((end-time)/1000 + " seconds");
             }
             adrianaIsASlut++;
         }
