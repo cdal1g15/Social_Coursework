@@ -24,11 +24,12 @@ public class Database {
         Database db = new Database();
         db.loadTrainingSet();//takes ~25 seconds
         db.loadUserAverages();
-        //db.loadUniqueTestUsers();
+        db.loadUniqueTestUsers();
         db.loadTestSet();
         db.sizeOfSet(db.trainingSet);
-        db.storePredictions();
-        db.addPredictedRatings();
+        db.storeUserSimilarity();
+        //db.storePredictions();
+        //db.addPredictedRatings();
         //Similarity sim = new Similarity(db.trainingSet, db.userAverages);
         //sim.sumTotal(4, 135350);
         System.out.println(); //4 and 135350 have sim of 0.36501
@@ -61,7 +62,6 @@ public class Database {
 
     private void storeUserSimilarity() {
         Similarity sim = new Similarity(trainingSet, userAverages);
-        HashMap<Integer, HashMap<Integer, Double>> simUsers = new HashMap<>();
         String sql;
         PreparedStatement stmt;
         int user1;
@@ -69,11 +69,12 @@ public class Database {
         try {
             stmt = c.prepareStatement(sql);
             Long time = System.currentTimeMillis();
+            int count =1;
             for (int i = 0; i < testUsers.size(); i++) {
                 user1 = testUsers.get(i);
                 int j=1;
                 int limit =0;
-                while( j < userAverages.size() && limit <120) {
+                while( j < userAverages.size() && /*limit <400*/) {
                     Double userSim = sim.sumTotal(user1, j);
                     if(userSim > 0.7 && userSim <1) {
                         stmt.setInt(1, user1);
@@ -84,7 +85,10 @@ public class Database {
                     }
                     j++;
                 }
-                System.out.println("Done " + user1);
+                Long end = System.currentTimeMillis();
+                System.out.println((end-time)/1000 + "seconds");
+                System.out.println("Done user " + user1 + " number " + count);
+                count++;
                 stmt.executeBatch();
                 c.commit();
             }
@@ -270,14 +274,11 @@ public class Database {
 
     //adds predictions from hashMap into database
     private void addPredictedRatings() {
-
         HashMap<Integer,Double> item_rating;
         int item_id;
         double rating;
         String sql;
         PreparedStatement stmt;
-
-
         try {
             sql = "UPDATE testTable SET prediction=? WHERE user_id=? AND item_id=?";
             stmt = c.prepareStatement(sql);
@@ -294,14 +295,11 @@ public class Database {
                     stmt.setInt(3, item_id);
 
                     stmt.addBatch();
-
                 }
-
             }
-
             stmt.executeBatch();
             c.commit();
-
+            System.out.println("Predictions saved");
             stmt.close();
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());

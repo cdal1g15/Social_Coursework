@@ -31,6 +31,7 @@ public class Prediction {
     //calculates top half of sum
     private double topSum(int user_id, int item_id){
         double sum = 0.0;
+        double bottom = 0.0;
         int user;
         double similarity;
         double rating;
@@ -45,26 +46,15 @@ public class Prediction {
                 //we didn't set the user average here, whoops
                 user_average = userAverages.get(user);
                 sum += similarity * (rating - user_average);
+                bottom += similarity;
             }
         }
-
-        return sum;
-    }
-
-    //calculates bottom half of sum
-    private double bottomSum(int user_id, int item_id){
-        double sum = 0.0;
-
-        HashMap<Integer, Double> user_sim = similarities.get(user_id);
-
-        for(Map.Entry<Integer, Double> entry: user_sim.entrySet()){
-            int user = entry.getKey();
-            //Added user have same item check
-            if(checkItemExists(user, item_id)) {
-                sum += entry.getValue();
-            }
+        if(bottom!=0.0) {
+            sum = sum / bottom;
         }
-
+        else{
+            sum = 0.0;
+        }
         return sum;
     }
 
@@ -72,22 +62,19 @@ public class Prediction {
     public double total(int user_id, int item_id){
         double sum;
         double topSum;
-        double bottomSum;
 
         topSum = topSum(user_id, item_id);
-        bottomSum = bottomSum(user_id, item_id);
         //System.out.println("user average = " + userAverages.get(user_id));
-        sum = userAverages.get(user_id); //Set prediction as average rating
-        if(topSum!=0.0 && bottomSum !=0.0){
-            sum += (topSum/bottomSum);
-        }
+
+        sum = userAverages.get(user_id) + topSum; //Set prediction as average rating
         if(sum>10){
-            sum=10.0;
+            sum=10;
+        }
+        if(sum<0){
+            sum=0;
         }
         //System.out.println("Sum = " + sum);
         return sum;
     }
-
     //5.93576564765119 is average rating in trainingSet
-
 }
