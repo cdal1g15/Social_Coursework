@@ -7,7 +7,7 @@ import java.util.Map;
 public class Database {
 
 
-    private final String connection_string = "jdbc:sqlite:test.sl3";
+    private final String connection_string = "jdbc:sqlite:/media/conor/AdrianaTheSlut/test.sl3";
     private Connection c;
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     private HashMap<Integer, HashMap<Integer, Double>> trainingSet;
@@ -27,8 +27,8 @@ public class Database {
                                         //different hashmap structure to user collab filtering
         db.loadUserAverages();
 
-        db.loadUniqueTest("item");
-
+        //db.loadUniqueTest("item");
+        db.loadItemAverages();
         //db.loadUniqueTestUsers();
 
         db.loadTestSet();
@@ -90,7 +90,7 @@ public class Database {
 
         String sql;
         PreparedStatement stmt;
-        sql = "INSERT INTO simMatrix VALUES (?,?,?)";
+        sql = "INSERT INTO simMatrixItems VALUES (?,?,?)";
         try {
             stmt = c.prepareStatement(sql);
             Long time = System.currentTimeMillis();
@@ -98,9 +98,9 @@ public class Database {
             for (Integer value: uniqueSet) {
                 int j=1;
                 int limit =0;
-                while( j < noOfElements && limit <400) {
+                while( j < noOfElements && limit <1000) {
                     Double similarity = sim.sumTotal(value, j, field);
-                    if(similarity > 0.7 && similarity <1) {
+                    if(similarity > 0.3) {
                         stmt.setInt(1, value);
                         stmt.setInt(2, j);
                         stmt.setDouble(3, similarity);
@@ -109,9 +109,11 @@ public class Database {
                     }
                     j++;
                 }
-                Long end = System.currentTimeMillis();
-                System.out.println((end-time)/1000 + "seconds");
-                System.out.println("Done user " + value + " number " + count);
+                if(value%100 ==0) {
+                    Long end = System.currentTimeMillis();
+                    System.out.println((end - time) / 1000 + "seconds");
+                    System.out.println("Done user " + value + " number " + count);
+                }
                 count++;
                 stmt.executeBatch();
                 c.commit();
@@ -136,9 +138,26 @@ public class Database {
             c.commit();
 
             while (rs.next()) {
-                userAverages.put(rs.getInt("user_id"), rs.getDouble("average"));
+                userAverages.put(rs.getInt("user_id"), rs.getDouble("avg"));
             }
             System.out.println("User Averages loaded.");
+        } catch (SQLException e) {
+            System.out.println("SQLException: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void loadItemAverages() {
+        try {
+            String sql = "SELECT * FROM item_averages";
+            PreparedStatement stmt = c.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            c.commit();
+
+            while (rs.next()) {
+                testItems.add(rs.getInt("item_id"));
+            }
+            System.out.println("Items loaded.");
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
             e.printStackTrace();
@@ -174,7 +193,7 @@ public class Database {
 
     private void loadUniqueTest(String field) {
 
-        String columnName = field +"_id";
+        String columnName = field + "_id";
         try {
             String sql = "SELECT DISTINCT " +columnName+" FROM testTable";
             PreparedStatement stmt = c.prepareStatement(sql);

@@ -43,10 +43,10 @@ public class Similarity {
 
     private double itemSimTotal(HashMap<Integer,Double> item1SimUsersHash,
                                 HashMap<Integer,Double> item2SimUsersHash){
-        Double answer = 0.0;
-        Double topSum = 0.0;
-        Double leftBottomSum=0.0;
-        Double rightBottomSum=0.0;
+        double answer = 0.0;
+        double topSum = 0.0;
+        double leftBottomSum=0.0;
+        double rightBottomSum=0.0;
 
         for(Map.Entry<Integer,Double> entry1: item1SimUsersHash.entrySet()){
             Integer user = entry1.getKey();
