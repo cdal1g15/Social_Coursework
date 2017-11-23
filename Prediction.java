@@ -73,6 +73,7 @@ public class Prediction {
         if(sum<0){
             sum=0;
         }
+
         //System.out.println("Sum = " + sum);
         return sum;
     }

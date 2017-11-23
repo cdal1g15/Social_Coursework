@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class Database {
 
-
     private final String connection_string = "jdbc:sqlite:/media/conor/AdrianaTheSlut/test.sl3";
     private Connection c;
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
@@ -24,12 +23,12 @@ public class Database {
         Database db = new Database();
         db.loadTrainingSet();//takes ~25 seconds
         db.loadUserAverages();
-        db.loadUniqueTestUsers();
+        //db.loadUniqueTestUsers();
         db.loadTestSet();
         db.sizeOfSet(db.trainingSet);
-        db.storeUserSimilarity();
-        //db.storePredictions();
-        //db.addPredictedRatings();
+        //db.storeUserSimilarity();
+        db.storePredictions();
+        db.addPredictedRatings();
         //Similarity sim = new Similarity(db.trainingSet, db.userAverages);
         //sim.sumTotal(4, 135350);
         System.out.println(); //4 and 135350 have sim of 0.36501
@@ -38,12 +37,12 @@ public class Database {
 
     //Initialise storage, connect to database
     private Database() {
-        trainingSet = new HashMap<>();
-        userAverages = new HashMap<>();
-        predictions = new HashMap<>();
-        testUsers = new ArrayList<>();
-        testSet = new HashMap<>();
-        similarities = new HashMap<>();
+        trainingSet = new HashMap<Integer, HashMap<Integer, Double>>();
+        userAverages = new HashMap<Integer, Double>();
+        predictions = new HashMap<Integer, HashMap<Integer, Double>> ();
+        testUsers = new ArrayList<Integer>();
+        testSet = new HashMap<Integer,ArrayList<Integer>>();
+        similarities = new HashMap<Integer, HashMap<Integer, Double>>();
 
         try {
             Class.forName(JDBC_DRIVER);
@@ -52,6 +51,7 @@ public class Database {
             System.out.println("Opened database successfully");
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("ErrorHERE");
         }
     }
 
@@ -74,9 +74,9 @@ public class Database {
                 user1 = testUsers.get(i);
                 int j=1;
                 int limit =0;
-                while( j < userAverages.size() && /*limit <400*/) {
+                while( j < userAverages.size() && limit <1000) {
                     Double userSim = sim.sumTotal(user1, j);
-                    if(userSim > 0.7 && userSim <1) {
+                    if(userSim > 0.3 && userSim <1) {
                         stmt.setInt(1, user1);
                         stmt.setInt(2, j);
                         stmt.setDouble(3, userSim);
@@ -136,7 +136,7 @@ public class Database {
                 }
                 else{
                     user =nextUser;
-                    testSet.put(rs.getInt("user_id"), new ArrayList<>());
+                    testSet.put(rs.getInt("user_id"), new ArrayList<Integer>());
                     testSet.get(rs.getInt("user_id")).add(rs.getInt("item_id"));
                 }
 
@@ -185,7 +185,7 @@ public class Database {
                     trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
                 } else {
                     user = nextUser;
-                    trainingSet.put(user, new HashMap<>());
+                    trainingSet.put(user, new HashMap<Integer, Double>());
                     trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
                 }
             }
@@ -200,7 +200,7 @@ public class Database {
     public HashMap<Integer, HashMap<Integer, Double>> loadSimilarities(int test_user){
         int user = 0;
         int nextUser;
-        HashMap<Integer, HashMap<Integer, Double>> similarities = new HashMap<>();
+        HashMap<Integer, HashMap<Integer, Double>> similarities = new HashMap<Integer, HashMap<Integer, Double>>();
         try { //gets all similarities for a user
             String sql = "SELECT * FROM simMatrix WHERE user_id=?";
 
@@ -218,7 +218,7 @@ public class Database {
                     similarities.get(user).put(rs.getInt("user2_id"), rs.getDouble("prediction"));
                 } else {
                     user = nextUser;
-                    similarities.put(user, new HashMap<>());
+                    similarities.put(user, new HashMap<Integer, Double>());
                     similarities.get(user).put(rs.getInt("user2_id"), rs.getDouble("prediction"));
                 }
             }
@@ -253,7 +253,7 @@ public class Database {
                     predictions.get(userID).put(itemID.get(i), prediction);
                 } else {
                     userID = nextUser;
-                    predictions.put(userID, new HashMap<>());
+                    predictions.put(userID, new HashMap<Integer, Double>());
                     predictions.get(userID).put(itemID.get(i), prediction);
                 }
             }

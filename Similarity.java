@@ -24,13 +24,13 @@ public class Similarity {
             Double user1Average = userAverage.get(user1);
             Double user2Average = userAverage.get(user2);
             //System.out.println(user1Average + " : " + user2Average);
-            top = topHalfSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
+            top = simSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
         }
         return top;
     }
 
 
-    public double topHalfSum(HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
+    public double simSum(HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
                              Double user1Average, Double user2Average){
         Double sum = 0.0;
         //calculate top half of equation
