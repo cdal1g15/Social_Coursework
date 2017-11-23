@@ -14,23 +14,59 @@ public class Similarity {
         userAverage=colorado;
     }
 
-    public Double sumTotal(int user1, int user2){
-        HashMap<Integer,Double> user1Hash = ratingHash.get(user1);
-        HashMap<Integer,Double> user2Hash = ratingHash.get(user2);
-        HashMap<Integer,Double> user1SimItemsHash = intersectMaps(user1Hash, user2Hash);
-        HashMap<Integer,Double> user2SimItemsHash = intersectMaps(user2Hash, user1Hash);
+    /*
+    * x is user1/item1
+    * y is user2/item2
+    * */
+    public Double sumTotal(int x, int y, String type){
+        HashMap<Integer,Double> xHash = ratingHash.get(x);
+        HashMap<Integer,Double> yHash = ratingHash.get(y);
+        HashMap<Integer,Double> xSimHash = intersectMaps(xHash, yHash);
+        HashMap<Integer,Double> ySimHash = intersectMaps(yHash, xHash);
+
         Double top =0.0;
-        if(user1SimItemsHash.size()>0) {
-            Double user1Average = userAverage.get(user1);
-            Double user2Average = userAverage.get(user2);
-            //System.out.println(user1Average + " : " + user2Average);
-            top = topHalfSum(user1SimItemsHash, user2SimItemsHash, user1Average, user2Average);
+
+        if(xSimHash.size()>0) {
+
+            //uses different sum for
+            if(type.equals("user")) {
+                Double user1Average = userAverage.get(x);
+                Double user2Average = userAverage.get(y);
+                //System.out.println(user1Average + " : " + user2Average);
+                top = topHalfSum(xSimHash, ySimHash, user1Average, user2Average);
+            }else{
+                top = itemSimTotal(xSimHash, ySimHash);
+            }
         }
         return top;
     }
 
+    private double itemSimTotal(HashMap<Integer,Double> item1SimUsersHash,
+                                HashMap<Integer,Double> item2SimUsersHash){
+        Double answer = 0.0;
+        Double topSum = 0.0;
+        Double leftBottomSum=0.0;
+        Double rightBottomSum=0.0;
 
-    public double topHalfSum(HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
+        for(Map.Entry<Integer,Double> entry1: item1SimUsersHash.entrySet()){
+            Integer user = entry1.getKey();
+            Double average = userAverage.get(user);
+            Double item1rating = entry1.getValue();
+            Double item2rating = item2SimUsersHash.get(user);
+
+            topSum+= (item1rating - average) * (item2rating - average);
+            leftBottomSum+= Math.pow((item1rating - average),2);
+            rightBottomSum+= Math.pow((item2rating-average),2);
+        }
+
+        if(topSum>0) {
+            Double bottomSum = Math.sqrt(leftBottomSum) * Math.sqrt(rightBottomSum);
+            answer = topSum / bottomSum;
+        }
+        return answer;
+    }
+
+    private double topHalfSum(HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
                              Double user1Average, Double user2Average){
         Double sum = 0.0;
         //calculate top half of equation

@@ -7,13 +7,14 @@ import java.util.Map;
 public class Database {
 
 
-    private final String connection_string = "jdbc:sqlite:/media/conor/AdrianaTheSlut/test.sl3";
+    private final String connection_string = "jdbc:sqlite:test.sl3";
     private Connection c;
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     private HashMap<Integer, HashMap<Integer, Double>> trainingSet;
     private HashMap<Integer, Double> userAverages;
     private HashMap<Integer, HashMap<Integer, Double>> predictions;
     private ArrayList<Integer> testUsers;
+    private ArrayList<Integer> testItems;
     private HashMap<Integer,ArrayList<Integer>> testSet;
     private HashMap<Integer, HashMap<Integer, Double>> similarities;
     private String[] sqlSim;
@@ -22,12 +23,20 @@ public class Database {
 
     public static void main(String[] args) {
         Database db = new Database();
-        db.loadTrainingSet();//takes ~25 seconds
+        db.loadTrainingSet("item");//takes ~25 seconds
+                                        //different hashmap structure to user collab filtering
         db.loadUserAverages();
-        db.loadUniqueTestUsers();
+
+        db.loadUniqueTest("item");
+
+        //db.loadUniqueTestUsers();
+
         db.loadTestSet();
         db.sizeOfSet(db.trainingSet);
-        db.storeUserSimilarity();
+
+        db.storeSimilarity("item");
+
+        //db.storeSimilarity("user");
         //db.storePredictions();
         //db.addPredictedRatings();
         //Similarity sim = new Similarity(db.trainingSet, db.userAverages);
@@ -42,6 +51,7 @@ public class Database {
         userAverages = new HashMap<>();
         predictions = new HashMap<>();
         testUsers = new ArrayList<>();
+        testItems = new ArrayList<>();
         testSet = new HashMap<>();
         similarities = new HashMap<>();
 
@@ -60,26 +70,40 @@ public class Database {
     }
 
 
-    private void storeUserSimilarity() {
-        Similarity sim = new Similarity(trainingSet, userAverages);
+    private void storeSimilarity(String field) {
+
+        Similarity sim;
+        ArrayList<Integer> uniqueSet;
+        int noOfElements;
+
+        //changes set based on which similarity we're getting
+        if(field.equals("user")){
+            uniqueSet = testUsers;
+            noOfElements = userAverages.size();
+
+        }else{
+            uniqueSet = testItems;
+            noOfElements = 80007;
+        }
+
+        sim = new Similarity(trainingSet, userAverages);
+
         String sql;
         PreparedStatement stmt;
-        int user1;
         sql = "INSERT INTO simMatrix VALUES (?,?,?)";
         try {
             stmt = c.prepareStatement(sql);
             Long time = System.currentTimeMillis();
             int count =1;
-            for (int i = 0; i < testUsers.size(); i++) {
-                user1 = testUsers.get(i);
+            for (Integer value: uniqueSet) {
                 int j=1;
                 int limit =0;
-                while( j < userAverages.size() && /*limit <400*/) {
-                    Double userSim = sim.sumTotal(user1, j);
-                    if(userSim > 0.7 && userSim <1) {
-                        stmt.setInt(1, user1);
+                while( j < noOfElements && limit <400) {
+                    Double similarity = sim.sumTotal(value, j, field);
+                    if(similarity > 0.7 && similarity <1) {
+                        stmt.setInt(1, value);
                         stmt.setInt(2, j);
-                        stmt.setDouble(3, userSim);
+                        stmt.setDouble(3, similarity);
                         stmt.addBatch();
                         limit++;
                     }
@@ -87,7 +111,7 @@ public class Database {
                 }
                 Long end = System.currentTimeMillis();
                 System.out.println((end-time)/1000 + "seconds");
-                System.out.println("Done user " + user1 + " number " + count);
+                System.out.println("Done user " + value + " number " + count);
                 count++;
                 stmt.executeBatch();
                 c.commit();
@@ -112,7 +136,7 @@ public class Database {
             c.commit();
 
             while (rs.next()) {
-                userAverages.put(rs.getInt("user_id"), rs.getDouble("avg"));
+                userAverages.put(rs.getInt("user_id"), rs.getDouble("average"));
             }
             System.out.println("User Averages loaded.");
         } catch (SQLException e) {
@@ -148,17 +172,19 @@ public class Database {
         }
     }
 
-    private void loadUniqueTestUsers() {
+    private void loadUniqueTest(String field) {
+
+        String columnName = field +"_id";
         try {
-            String sql = "SELECT DISTINCT user_id FROM testTable";
+            String sql = "SELECT DISTINCT " +columnName+" FROM testTable";
             PreparedStatement stmt = c.prepareStatement(sql);
             ResultSet rs = stmt.executeQuery();
             c.commit();
 
             while (rs.next()) {
-                testUsers.add(rs.getInt("user_id"));
+                testUsers.add(rs.getInt(columnName));
             }
-            System.out.println("Test Users loaded.");
+            System.out.println("Test "+field+" loaded.");
         } catch (SQLException e) {
             System.out.println("SQLException: " + e.getMessage());
             e.printStackTrace();
@@ -167,9 +193,20 @@ public class Database {
 
 
     //Loads trainingSet in java
-    private void loadTrainingSet() {
+    private void loadTrainingSet(String type) {
         int user = 0;
         int nextUser;
+
+        String field1;
+        String field2;
+
+        if(type.equals("user")){
+            field1 = "user_id";
+            field2 = "item_id";
+        }else{
+            field1 = "item_id";
+            field2 = "user_id";
+        }
 
         try {
             String sql = "SELECT * FROM trainingSet";
@@ -179,14 +216,14 @@ public class Database {
 
             //Checks if nextUser is CurrentUser, if so adds item to CurrentUsers hash, else moves on
             while (rs.next()) {
-                nextUser = rs.getInt("user_id");
+                nextUser = rs.getInt(field1);
 
                 if (user == nextUser) {
-                    trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
+                    trainingSet.get(user).put(rs.getInt(field2), rs.getDouble("rating"));
                 } else {
                     user = nextUser;
                     trainingSet.put(user, new HashMap<>());
-                    trainingSet.get(user).put(rs.getInt("item_id"), rs.getDouble("rating"));
+                    trainingSet.get(user).put(rs.getInt(field2), rs.getDouble("rating"));
                 }
             }
         } catch (SQLException e) {
@@ -195,6 +232,7 @@ public class Database {
         }
         System.out.println("Training Set loaded.");
     }
+
 
     //loads from database the similarity measures for a user
     public HashMap<Integer, HashMap<Integer, Double>> loadSimilarities(int test_user){
