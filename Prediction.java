@@ -19,6 +19,12 @@ public class Prediction {
         similarities = munich;
     }
 
+    public Prediction(HashMap<Integer, HashMap<Integer, Double>> berlin,
+                      HashMap<Integer, HashMap<Integer, Double>> munich){
+        trainingSet = berlin;
+        similarities = munich;
+    }
+
 
     public void setSimilarity(HashMap<Integer, HashMap<Integer, Double>> similarity){
         similarities = similarity;
@@ -58,24 +64,57 @@ public class Prediction {
         return sum;
     }
 
-    //calculates prediction using user_id and item_id
-    public double total(int user_id, int item_id){
-        double sum;
-        double topSum;
 
-        topSum = topSum(user_id, item_id);
-        //System.out.println("user average = " + userAverages.get(user_id));
+    private double itemSum(int user_id, int item_id){
+        double sum = 0.0;
+        double top = 0.0;
+        double bottom = 0.0;
+        double rating = 0.0;
+        double similarity = 0.0;
+        int item = 0;
 
-        sum = userAverages.get(user_id) + topSum; //Set prediction as average rating
-        if(sum>10){
-            sum=10;
+        HashMap<Integer, Double> item_sim = similarities.get(item_id);
+        for(Map.Entry<Integer, Double> entry: item_sim.entrySet()){
+            item = entry.getKey();
+            similarity = entry.getValue();
+            if(checkItemExists(user_id, item)) {
+                rating = trainingSet.get(user_id).get(item);
+                top += similarity * rating;
+                bottom += similarity;
+            }
         }
-        if(sum<0){
-            sum=0;
+
+        if(bottom!=0.0) {
+            sum = top / bottom;
+        }
+        else{
+            sum = 0.0;
+        }
+
+        return sum;
+
+    }
+
+    //calculates prediction using user_id and item_id
+    public double total(int user_id, int item_id, String type){
+        double total = 0.0;
+        double sum;
+
+        if(type.equals("user")) {
+            sum = topSum(user_id, item_id);
+            total = userAverages.get(user_id) + sum; //Set prediction as average rating
+        }else{
+            total = itemSum(user_id,item_id);
+        }
+        if(total>10){
+            total=10;
+        }
+        if(total<0){
+            total=0;
         }
 
         //System.out.println("Sum = " + sum);
-        return sum;
+        return total;
     }
     //5.93576564765119 is average rating in trainingSet
 }
