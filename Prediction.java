@@ -31,7 +31,11 @@ public class Prediction {
     }
 
     private boolean checkItemExists(int user, int item){
-        return trainingSet.get(user).get(item) !=null;
+        boolean exists = false;
+        if(trainingSet.get(user).get(item)!=null){
+            exists=true;
+        };
+        return  exists;
     }
 
     //calculates top half of sum
