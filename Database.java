@@ -7,7 +7,6 @@ import java.util.Map;
 public class Database {
 
 
-    private final String connection_string = "jdbc:sqlite:/home/conor/Documents/Social_Coursework/Social_Coursework/test.sl3";
     private Connection c;
     private static final String JDBC_DRIVER = "org.sqlite.JDBC";
     private HashMap<Integer, HashMap<Integer, Double>> trainingSet;
@@ -16,10 +15,7 @@ public class Database {
     private ArrayList<Integer> testUsers;
     private ArrayList<Integer> testItems;
     private HashMap<Integer,ArrayList<Integer>> testSet;
-    private HashMap<Integer, HashMap<Integer, Double>> similarities;
-    private String[] sqlSim;
     private final static String rec_system_type = "user";
-    //private static final int TEST_SET_SIZE = 60705;
 
 
     public static void main(String[] args) {
@@ -27,21 +23,14 @@ public class Database {
         db.loadTrainingSet("user");//takes ~25 seconds
                                         //different hashmap structure to user collab filtering
         db.loadUserAverages();
-
         db.loadUniqueTest(rec_system_type);
         //db.loadItemAverages();
         //db.loadUniqueTestUsers();
-
         db.loadTestSet();
         db.sizeOfSet(db.trainingSet);
-
         //db.storeSimilarity(rec_system_type);
-
         db.storePredictions(rec_system_type);
         db.addPredictedRatings();
-        //Similarity sim = new Similarity(db.trainingSet, db.userAverages);
-        //sim.sumTotal(4, 135350);
-        System.out.println(); //4 and 135350 have sim of 0.36501
     }
 
 
@@ -53,10 +42,10 @@ public class Database {
         testUsers = new ArrayList<>();
         testItems = new ArrayList<>();
         testSet = new HashMap<>();
-        similarities = new HashMap<>();
 
         try {
             Class.forName(JDBC_DRIVER);
+            String connection_string = "jdbc:sqlite:/home/conor/Documents/Social_Coursework/Social_Coursework/test.sl3";
             c = DriverManager.getConnection(connection_string);
             c.setAutoCommit(false);
             System.out.println("Opened database successfully");

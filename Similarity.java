@@ -69,14 +69,12 @@ public class Similarity {
     private double topHalfSum(HashMap<Integer,Double> user1SimItemsHash, HashMap<Integer,Double> user2SimItemsHash,
                              Double user1Average, Double user2Average){
         Double sum = 0.0;
-        //calculate top half of equation
         Double leftBottomSum=0.0;
         Double rightBottomSum=0.0;
         for(Map.Entry<Integer, Double> entry1 : user1SimItemsHash.entrySet()){
             Integer item = entry1.getKey();
             Double user1Value = entry1.getValue();
             Double user2Value = user2SimItemsHash.get(item);
-            //System.out.println("user1 :" + user1Value + " user2 :" + user2Value);
             sum+= (user1Value - user1Average) * (user2Value - user2Average);
             leftBottomSum+= Math.pow((user1Value - user1Average),2);
             rightBottomSum+= Math.pow((user2Value - user2Average),2);

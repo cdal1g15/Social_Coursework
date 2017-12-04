@@ -12,17 +12,17 @@ public class Prediction {
     private HashMap<Integer, HashMap<Integer, Double>> similarities;
 
 
-    public Prediction(HashMap<Integer, HashMap<Integer, Double>> berlin,
-                      HashMap<Integer, Double> dortmund, HashMap<Integer, HashMap<Integer, Double>> munich){
-        trainingSet = berlin;
-        userAverages = dortmund;
-        similarities = munich;
+    public Prediction(HashMap<Integer, HashMap<Integer, Double>> train,
+                      HashMap<Integer, Double> avg, HashMap<Integer, HashMap<Integer, Double>> sim){
+        trainingSet = train;
+        userAverages = avg;
+        similarities = sim;
     }
 
-    public Prediction(HashMap<Integer, HashMap<Integer, Double>> berlin,
-                      HashMap<Integer, HashMap<Integer, Double>> munich){
-        trainingSet = berlin;
-        similarities = munich;
+    public Prediction(HashMap<Integer, HashMap<Integer, Double>> train,
+                      HashMap<Integer, HashMap<Integer, Double>> sim){
+        trainingSet = train;
+        similarities = sim;
     }
 
 
@@ -34,7 +34,7 @@ public class Prediction {
         boolean exists = false;
         if(trainingSet.get(user).get(item)!=null){
             exists=true;
-        };
+        }
         return  exists;
     }
 
@@ -53,7 +53,6 @@ public class Prediction {
             similarity = entry.getValue();
             if(checkItemExists(user, item_id)) {
                 rating = trainingSet.get(user).get(item_id);
-                //we didn't set the user average here, whoops
                 user_average = userAverages.get(user);
                 sum += similarity * (rating - user_average);
                 bottom += similarity;
@@ -70,12 +69,12 @@ public class Prediction {
 
 
     private double itemSum(int user_id, int item_id){
-        double sum = 0.0;
+        double sum;
         double top = 0.0;
         double bottom = 0.0;
-        double rating = 0.0;
-        double similarity = 0.0;
-        int item = 0;
+        double rating;
+        double similarity;
+        int item;
 
         HashMap<Integer, Double> item_sim = similarities.get(item_id);
         for(Map.Entry<Integer, Double> entry: item_sim.entrySet()){
@@ -96,17 +95,18 @@ public class Prediction {
         }
 
         return sum;
-
     }
 
     //calculates prediction using user_id and item_id
     public double total(int user_id, int item_id, String type){
-        double total = 0.0;
+        double total;
         double sum;
 
+        //Check if running user or item based system
         if(type.equals("user")) {
             sum = topSum(user_id, item_id);
-            total = userAverages.get(user_id) + sum; //Set prediction as average rating
+            //Set prediction as average rating
+            total = userAverages.get(user_id) + sum;
         }else{
             total = itemSum(user_id,item_id);
         }
@@ -116,9 +116,6 @@ public class Prediction {
         if(total<0){
             total=0;
         }
-
-        //System.out.println("Sum = " + sum);
         return total;
     }
-    //5.93576564765119 is average rating in trainingSet
 }
