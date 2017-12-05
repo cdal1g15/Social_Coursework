@@ -326,7 +326,7 @@ public class Database {
         }
         Long time = System.currentTimeMillis();
         //calculates prediction for every record in testSet
-        int adrianaIsASlut =0;
+        int numberOfPredictions =0;
 
         for(Map.Entry<Integer, ArrayList<Integer>> entry : testSet.entrySet()){
             nextUser=entry.getKey();
@@ -361,12 +361,12 @@ public class Database {
                 }
             }*/
 
-            if(adrianaIsASlut%1000 ==0){
-                System.out.println( adrianaIsASlut + " Predictions");
+            if(numberOfPredictions%1000 ==0){
+                System.out.println( numberOfPredictions + " Predictions");
                 Long end = System.currentTimeMillis();
                 System.out.println((end-time)/1000 + " seconds");
             }
-            adrianaIsASlut++;
+            numberOfPredictions++;
         }
         Long end = System.currentTimeMillis();
         System.out.println((end-time)/1000 + "seconds");
