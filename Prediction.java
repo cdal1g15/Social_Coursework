@@ -2,7 +2,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Create prediction here
+ * Create prediction
  */
 public class Prediction {
 
